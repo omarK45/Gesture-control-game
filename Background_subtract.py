@@ -5,6 +5,7 @@ class BackgroundSubtractor:
     def __init__(self, alpha=0.01):
         self.alpha = alpha
         self.background = None
+        #testing
 
     def apply(self, frame):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
