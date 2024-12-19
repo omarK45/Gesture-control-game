@@ -7,11 +7,11 @@ def calibrate_skin_tone(frame, tolerance=40):
     x1, y1, x2, y2 = w // 2 - 50, h // 2 - 50, w // 2 + 50, h // 2 + 50
     roi = frame[y1:y2, x1:x2]
 
-    # Convert the ROI to HSV
+
     roi_hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
     hsv_mean = np.mean(roi_hsv, axis=(0, 1))
 
-    # Set HSV thresholds based on tolerance
+
     hsv_min = np.clip(hsv_mean - tolerance, 0, 255).astype(np.uint8)
     hsv_max = np.clip(hsv_mean + tolerance, 0, 255).astype(np.uint8)
 
