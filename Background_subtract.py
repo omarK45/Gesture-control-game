@@ -16,8 +16,7 @@ class BackgroundSubtractor:
 
 
         diff = cv2.absdiff(gray, cv2.convertScaleAbs(self.background))
-        motion_level = np.sum(diff) / (gray.shape[0] * gray.shape[1])
-        self.alpha = 0.01 if motion_level < 0.02 else 0.03
+       
 
        
         cv2.accumulateWeighted(gray, self.background, self.alpha)

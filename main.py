@@ -12,9 +12,10 @@ def main():
         print("Error: Cannot open camera.")
         return
 
-    bg_subtractor = BackgroundSubtractor(alpha=0.02)
+    bg_subtractor = BackgroundSubtractor(alpha=0.1)
     calibrated = False
     hsv_min, hsv_max = None, None
+    ycrcb_min, ycrcb_max = None, None
 
     while True:
         ret, frame = cap.read()
@@ -30,7 +31,7 @@ def main():
             cv2.imshow('Calibration', frame)
 
             if cv2.waitKey(1) & 0xFF == ord('c'):
-                hsv_min, hsv_max = calibrate_skin_tone(frame)
+                (hsv_min, hsv_max), (ycrcb_min, ycrcb_max) = calibrate_skin_tone(frame)
                 calibrated = True
                 cv2.destroyWindow('Calibration')
                 print("Calibration Complete!")
@@ -38,9 +39,9 @@ def main():
 
         # Background subtraction and skin segmentation
         bg_mask = bg_subtractor.apply(frame)
-        skin_mask, mask_hsv, mask_ycrcb = skin_segmentation(frame, hsv_min, hsv_max)
+        mask_hsv= skin_segmentation(frame, hsv_min, hsv_max, ycrcb_min, ycrcb_max)
+        #cv2.bitwise_not(mask_ycrcb)
 
-        #combined_mask = cv2.bitwise_or(bg_mask, skin_mask)
         #segmented_output = cv2.bitwise_and(frame, frame, mask=skin_mask)
 
         # Find contours from the HSV mask
@@ -75,7 +76,6 @@ def main():
         frame = draw_convexity_defects(frame, hand_contour,defects)
 
         cv2.imshow("Original Frame", frame)
-        #cv2.imshow("Background Subtraction Mask", bg_mask)
         cv2.imshow("HSV Mask", mask_hsv)
 
         key = cv2.waitKey(1) & 0xFF
