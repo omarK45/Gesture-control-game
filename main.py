@@ -37,10 +37,20 @@ def main():
                 cv2.destroyWindow('Calibration')
                 print("Calibration Complete!")
             continue
+        
+        height=frame.shape[0]
+        left_quarter_x = frame.shape[1] // 6
+        right_corner_x = left_quarter_x*5
+        middle_frame = frame[:, left_quarter_x:right_corner_x]
+        # Add lines to the frame
+        # color = (128, 128, 128)
+        # thickness = 2  # Thickness of the lines
+        # cv2.line(frame, (left_quarter_x, 0), (left_quarter_x, height), color, thickness)  # Left quarter line
+        # cv2.line(frame, (right_corner_x, 0), (right_corner_x, height), color, thickness)  # Right corner line
 
         # Background subtraction and skin segmentation
         bg_mask = bg_subtractor.apply(frame)
-        mask_hsv= skin_segmentation(frame, hsv_min, hsv_max, ycrcb_min, ycrcb_max)
+        mask_hsv= skin_segmentation(middle_frame, hsv_min, hsv_max, ycrcb_min, ycrcb_max)
         #cv2.bitwise_not(mask_ycrcb)
 
         #segmented_output = cv2.bitwise_and(frame, frame, mask=skin_mask)
@@ -76,6 +86,7 @@ def main():
         
         frame = draw_convexity_defects(frame, hand_contour,defects)
 
+       
         cv2.imshow("Original Frame", frame)
         cv2.imshow("HSV Mask", mask_hsv)
 
