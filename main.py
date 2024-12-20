@@ -15,6 +15,8 @@ def main():
     bg_subtractor = BackgroundSubtractor(alpha=0.1)
     calibrated = False
     hsv_min, hsv_max = None, None
+    
+    print("Place your hand in the rectangle and press 'c' to calibrate.")
     ycrcb_min, ycrcb_max = None, None
 
     while True:
@@ -22,9 +24,8 @@ def main():
         if not ret:
             break
         frame = cv2.flip(frame, 1)  # Flip to correct orientation
-
         if not calibrated:
-            print("Place your hand in the rectangle and press 'c' to calibrate.")
+           
             h, w, _ = frame.shape
             cv2.rectangle(frame, (w // 2 - 50, h // 2 - 50), (w // 2 + 50, h // 2 + 50), (0, 255, 0), 2)
             cv2.putText(frame, 'Press c to calibrate...', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
