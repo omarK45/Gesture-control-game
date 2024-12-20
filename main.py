@@ -7,7 +7,7 @@ from convex_hull import *
 from CoG import *
 from Classification import *
 def main():
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("Error: Cannot open camera.")
         return
@@ -40,8 +40,8 @@ def main():
         bg_mask = bg_subtractor.apply(frame)
         skin_mask, mask_hsv, mask_ycrcb = skin_segmentation(frame, hsv_min, hsv_max)
 
-        combined_mask = cv2.bitwise_or(bg_mask, skin_mask)
-        segmented_output = cv2.bitwise_and(frame, frame, mask=skin_mask)
+        #combined_mask = cv2.bitwise_or(bg_mask, skin_mask)
+        #segmented_output = cv2.bitwise_and(frame, frame, mask=skin_mask)
 
         # Find contours from the HSV mask
         contours, hierarchy = cv2.findContours(mask_hsv, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -57,9 +57,9 @@ def main():
         if hand_contour is not None:
             cv2.drawContours(frame, [hand_contour], -1, (0, 255, 0), 7)  # Green contour
             
-            hull = convex_hull(hand_contour)
+            hull = convex_hull(hand_contour) #normal
             #print ("the hull is ", hull)
-            hull_contour = np.array(hull, dtype=np.int32).reshape((-1, 1, 2))
+            hull_contour = np.array(hull, dtype=np.int32).reshape((-1, 1, 2)) #motkhalef
             cv2.drawContours(frame, [hull_contour], -1, (0, 0, 255), 7)
             
             
@@ -68,9 +68,11 @@ def main():
         centroid = (int(centroid[0]), int(centroid[1]))
         # print (centroid)
         cv2.circle(frame, centroid, 5, (255, 0, 0), -1)  
+       
+        defects = compute_convexity_defects(hand_contour, hull)
+
         
-        #finger_points, frame = classify_fingers(hand_contour, hull_contour, centroid, frame)
-        #frame = draw_convexity_defects(frame, hand_contour)
+        frame = draw_convexity_defects(frame, hand_contour,defects)
 
         cv2.imshow("Original Frame", frame)
         #cv2.imshow("Background Subtraction Mask", bg_mask)

@@ -32,7 +32,7 @@ def skin_segmentation(frame, hsv_min, hsv_max):
     ycrcb_max = np.array([255, 173, 127], dtype=np.uint8)
     mask_ycrcb = cv2.inRange(ycrcb, ycrcb_min, ycrcb_max)
 
-    #fakes ycrcb khara
+    #fakes ycrcb khara use hsv
     mask_combined = cv2.bitwise_or(mask_hsv, mask_ycrcb)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
