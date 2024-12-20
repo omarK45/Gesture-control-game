@@ -24,7 +24,7 @@ def calibrate_skin_tone(frame, tolerance_hsv=40, tolerance_ycrcb=20):
 
     return (tuple(hsv_min), tuple(hsv_max)), (tuple(ycrcb_min), tuple(ycrcb_max))
 
-def skin_segmentation(frame, hsv_min, hsv_max, ycrcb_min, ycrcb_max):
+def skin_segmentation(frame, hsv_min, hsv_max):
    
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     #ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
