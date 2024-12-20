@@ -96,7 +96,7 @@ def compute_convexity_defects(contour, hull_indices):
                     max_distance = distance_from_hull
                     defect_point_index = idx
 
-            if defect_point_index is not None:
+            if defect_point_index is not None and max_distance>15:
                
                 start_point = contour_points[index_start]
                 end_point = contour_points[index_end]
