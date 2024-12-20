@@ -119,11 +119,13 @@ def main():
         print("Error: Cannot open camera.")
         return
 
-    bg_subtractor = BackgroundSubtractor(alpha=0.02)
+    bg_subtractor = BackgroundSubtractor(alpha=0.1)
     calibrated = False
     hsv_min, hsv_max = None, None
 
     print("Place your hand in the rectangle and press 'c' to calibrate.")
+    ycrcb_min, ycrcb_max = None, None
+
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -136,7 +138,7 @@ def main():
             cv2.imshow('Calibration', frame)
 
             if cv2.waitKey(1) & 0xFF == ord('c'):
-                hsv_min, hsv_max = calibrate_skin_tone(frame)
+                (hsv_min, hsv_max), (ycrcb_min, ycrcb_max) = calibrate_skin_tone(frame)
                 calibrated = True
                 cv2.destroyWindow('Calibration')
                 print("Calibration Complete!")
@@ -144,6 +146,10 @@ def main():
 
         # Background subtraction and skin segmentation
         bg_mask = bg_subtractor.apply(frame)
+        mask_hsv= skin_segmentation(frame, hsv_min, hsv_max, ycrcb_min, ycrcb_max)
+        #cv2.bitwise_not(mask_ycrcb)
+
+        #segmented_output = cv2.bitwise_and(frame, frame, mask=skin_mask)
         skin_mask, mask_hsv, mask_ycrcb = skin_segmentation(frame, hsv_min, hsv_max)
 
         # Find contours from the HSV mask
