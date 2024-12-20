@@ -15,13 +15,13 @@ def main():
     bg_subtractor = BackgroundSubtractor(alpha=0.02)
     calibrated = False
     hsv_min, hsv_max = None, None
-
+    
+    print("Place your hand in the rectangle and press 'c' to calibrate.")
     while True:
         ret, frame = cap.read()
         if not ret:
             break
         frame = cv2.flip(frame, 1)  # Flip to correct orientation
-        print("Place your hand in the rectangle and press 'c' to calibrate.")
         if not calibrated:
            
             h, w, _ = frame.shape
