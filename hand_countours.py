@@ -13,9 +13,11 @@ def find_hand_contour(contours, frame):
 
     for contour in contours:
         # Ignore contours with an area smaller than 500 (filter out small contours)
-        if cv2.contourArea(contour) < 500:
+        if cv2.contourArea(contour) < 5000:
             continue
-        
+
+
+       
         # Get the x and y coordinates of the contour points
         contour_points = contour[:, 0]  # Get the array of points, since each contour is an array of tuples
 
