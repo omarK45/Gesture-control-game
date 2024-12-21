@@ -12,7 +12,7 @@ from Classification import *
 
 
 def main():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     if not cap.isOpened():
         print("Error: Cannot open camera.")
         return
