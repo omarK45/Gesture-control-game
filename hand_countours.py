@@ -43,5 +43,5 @@ def find_hand_contour(contours, frame):
             hand_contour = contour
             break  # Stop after finding a valid hand contour
 
-    return hand_contour  # Return the identified hand contour
+    return hand_contour,aspect_ratio  # Return the identified hand contour
 

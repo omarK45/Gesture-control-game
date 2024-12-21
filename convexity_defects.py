@@ -3,7 +3,7 @@ import numpy as np
 
 import math
 
-def point_to_line_distance(point, line_start, line_end):
+def point_to_line_distance(point , line_start, line_end):
     """
     Calculate the perpendicular distance from a point to a line segment.
     """

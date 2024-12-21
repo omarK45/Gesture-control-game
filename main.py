@@ -70,7 +70,7 @@ def main():
         sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
         # Use the function to find the hand contour
-        hand_contour = find_hand_contour(sorted_contours, frame)
+        hand_contour,aspect_ratio= find_hand_contour(sorted_contours, frame)
 
         # Draw the detected hand contour
         if hand_contour is not None:
@@ -93,6 +93,31 @@ def main():
         #cv2.imshow("bg mask", bg_mask)
         #cv2.imshow("combined mask",combined_mask)
         cv2.imshow("HSV Mask", mask_hsv)
+        
+        
+        
+        with open("/Users/maryamhabeb/Desktop/svm_model.pkl", "rb") as model_file:
+            svm = pickle.load(model_file)
+        with open("/Users/maryamhabeb/Desktop/scaler.pkl", "rb") as scaler_file:
+            scaler = pickle.load(scaler_file)
+
+        
+        
+        convex_hull_area = cv2.contourArea(np.array(hull, dtype=np.int32))
+        contour_area = cv2.contourArea(hand_contour)
+        contour_hull_ratio = contour_area / convex_hull_area
+        
+        perimeter = cv2.arcLength(hand_contour, True)
+        circularity = (4 * np.pi * contour_area) / (perimeter ** 2)
+        
+        frame_features = np.array([num_defects, contour_hull_ratio, aspect_ratio, circularity]).reshape(1, -1)
+        features_scaled = scaler.transform(frame_features)
+
+        # Predict gesture
+        prediction = svm.predict(features_scaled)
+        print("Prediction:", prediction[0])
+        cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
