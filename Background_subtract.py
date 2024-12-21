@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 class BackgroundSubtractor:
-    def __init__(self, alpha=0.01):
+    def __init__(self, alpha=0.001):
         self.alpha = alpha
         self.background = None
         #testing
