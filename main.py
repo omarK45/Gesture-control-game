@@ -6,8 +6,11 @@ from Background_subtract import BackgroundSubtractor
 from skin_segment import calibrate_skin_tone, skin_segmentation
 from hand_countours import *
 from convex_hull import *
+from Dataset_Creation import *
 from CoG import *
 from Classification import *
+from convexity_defects import *
+
 
 
 
@@ -17,7 +20,7 @@ def main():
         print("Error: Cannot open camera.")
         return
 
-    bg_subtractor = BackgroundSubtractor(alpha=0.1)
+    bg_subtractor = BackgroundSubtractor(alpha=0.005)
     calibrated = False
     hsv_min, hsv_max = None, None
 
@@ -56,7 +59,7 @@ def main():
         bg_mask = bg_subtractor.apply(frame)
         
         #cv2.bitwise_not(mask_ycrcb)
-
+        combined_mask=cv2.bitwise_and(mask_hsv,bg_mask)
         #segmented_output = cv2.bitwise_and(frame, frame, mask=skin_mask)
         mask_hsv= skin_segmentation(frame, hsv_min, hsv_max)
 
@@ -87,6 +90,8 @@ def main():
 
        
         cv2.imshow("Original Frame", frame)
+        #cv2.imshow("bg mask", bg_mask)
+        #cv2.imshow("combined mask",combined_mask)
         cv2.imshow("HSV Mask", mask_hsv)
 
         key = cv2.waitKey(1) & 0xFF

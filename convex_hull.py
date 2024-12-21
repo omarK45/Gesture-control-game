@@ -31,32 +31,3 @@ def convex_hull(points):
         upper.append(p)
     
     return lower[:-1] + upper[:-1]
-
-# Function to calculate the convex hull and extract the required points
-def get_convex_hull_points(points):
-    hull = convex_hull(points)
-    
-    # Extract the start_index, end_index, farthest_index, and fix_depth
-    start_index = points.index(hull[0])
-    end_index = points.index(hull[-1])
-    
-    # Find the farthest point from the start point
-    farthest_index = 0
-    max_dist = 0
-    for i, point in enumerate(hull):
-        dist = distance(hull[0], point)
-        if dist > max_dist:
-            max_dist = dist
-            farthest_index = i
-    
-    # Fix depth: this could be the number of points in the hull
-    fix_depth = len(hull)
-    
-    # Return the result
-    return {
-        "hull": hull,
-        "start_index": start_index,
-        "end_index": end_index,
-        "farthest_index": farthest_index,
-        "fix_depth": fix_depth
-    }
