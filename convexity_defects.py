@@ -28,6 +28,9 @@ def compute_convexity_defects(contour, hull_indices):
 
     defects = []
     contour_points = [(p[0][0], p[0][1]) if isinstance(p[0], np.ndarray) else tuple(p[0]) for p in contour]
+    _, _, _,h = cv2.boundingRect(contour)
+    depth_threshold = 0.2 * h  # 5% of hand height
+
 
     # Iterate over hull points
     for i in range(len(hull_indices)):
@@ -54,8 +57,8 @@ def compute_convexity_defects(contour, hull_indices):
                 if max_distance < distance_from_hull:
                     max_distance = distance_from_hull
                     defect_point_index = idx
-
-            if defect_point_index is not None and max_distance>15:
+    
+            if defect_point_index is not None and max_distance>depth_threshold:
                
                 start_point = contour_points[index_start]
                 end_point = contour_points[index_end]
