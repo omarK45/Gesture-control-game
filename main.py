@@ -70,6 +70,9 @@ def main():
         sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
         # Use the function to find the hand contour
+        if len(contours) == 0:
+            aspect_ratio = 0
+            hand_contour = None
         hand_contour,aspect_ratio= find_hand_contour(sorted_contours, frame)
 
         # Draw the detected hand contour
@@ -96,9 +99,9 @@ def main():
         
         
         
-        with open("/Users/maryamhabeb/Desktop/svm_model.pkl", "rb") as model_file:
+        with open("/Users/maryamhabeb/Desktop/datasets/svm_model.pkl", "rb") as model_file:
             svm = pickle.load(model_file)
-        with open("/Users/maryamhabeb/Desktop/scaler.pkl", "rb") as scaler_file:
+        with open("/Users/maryamhabeb/Desktop/datasets/qscaler.pkl", "rb") as scaler_file:
             scaler = pickle.load(scaler_file)
 
         
