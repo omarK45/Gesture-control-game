@@ -59,7 +59,7 @@ def main():
         bg_mask = bg_subtractor.apply(frame)
         
         #cv2.bitwise_not(mask_ycrcb)
-        combined_mask=cv2.bitwise_and(mask_hsv,bg_mask)
+        #combined_mask=cv2.bitwise_and(mask_hsv,bg_mask)
         #segmented_output = cv2.bitwise_and(frame, frame, mask=skin_mask)
         mask_hsv= skin_segmentation(frame, hsv_min, hsv_max)
 
