@@ -13,9 +13,10 @@ from convexity_defects import *
 from Angle_detection import *
 from bullet import *
 
-
+import pickle
+                        
 def main():
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("Error: Cannot open camera.")
         return
@@ -67,14 +68,13 @@ def main():
 
         # Find contours from the HSV mask
         contours, hierarchy = cv2.findContours(mask_hsv, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
+        if len(contours)==0:
+           continue
         # Sort contours by area
         sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
         # Use the function to find the hand contour
-        if len(contours) == 0:
-            aspect_ratio = 0
-            hand_contour = None
+        
         hand_contour,aspect_ratio= find_hand_contour(sorted_contours, frame)
 
         # Draw the detected hand contour
@@ -115,13 +115,13 @@ def main():
         perimeter = cv2.arcLength(hand_contour, True)
         circularity = (4 * np.pi * contour_area) / (perimeter ** 2)
         
-        frame_features = np.array([num_defects, contour_hull_ratio, aspect_ratio, circularity]).reshape(1, -1)
+        frame_features = np.array([len(defects), contour_hull_ratio, aspect_ratio, circularity]).reshape(1, -1)
         features_scaled = scaler.transform(frame_features)
         # print(frame.shape)
         # Predict gesture
         prediction = svm.predict(features_scaled)
-        # print("Prediction:", prediction[0])
-        # cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        print("Prediction:", prediction[0])
+        cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         #________________________________________Bullet_____________________________________
         
         rounded_angle, furthest_point = calculate_angle(centroid,hull)

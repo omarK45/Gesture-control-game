@@ -34,7 +34,6 @@ def collect_segmented_hand_dataset(output_directory, hsv_min, hsv_max, max_sampl
         if time.time() - start_time >= capture_interval:
             filename = f"{output_directory}/segmented_hand_{sample_count}.png"
             cv2.imwrite(filename, mask_hsv)
-            
             sample_count += 1
             start_time = time.time()
 
@@ -48,7 +47,7 @@ def collect_segmented_hand_dataset(output_directory, hsv_min, hsv_max, max_sampl
 if __name__ == "__main__":
     # Define the output directory and ensure it exists
     import os
-    output_directory = "/Users/maryamhabeb/Desktop/segmented_hands_dataset"
+    output_directory = "/Users/maryamhabeb/Desktop/temp_file"
     os.makedirs(output_directory, exist_ok=True)
 
     # Calibrate skin tone
