@@ -12,6 +12,25 @@ from Classification import *
 from convexity_defects import *
 from Angle_detection import *
 from bullet import *
+from random import randint
+from random import choice
+
+BALL_COLOR = (255, 255, 0)  # Yellow ball
+SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
+# Ball class to represent the falling balls
+class Ball:
+    def __init__(self, x, y, radius, speed):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.speed = speed
+    
+    def move(self):
+        self.y += self.speed  # Move the ball downwards
+
+    def draw(self, frame):
+        cv2.circle(frame, (self.x, self.y), self.radius, BALL_COLOR, -1)  # Draw the ball on the frame
+
 
 import pickle
                         
@@ -20,10 +39,27 @@ def main():
     if not cap.isOpened():
         print("Error: Cannot open camera.")
         return
-
     bg_subtractor = BackgroundSubtractor(alpha=0.005)
     calibrated = False
     hsv_min, hsv_max = None, None
+    # Create balls
+    balls = []
+    ball_radius = 20
+    ball_speed = 15
+
+    # Add initial balls to the list (randomly from left or right)
+    for _ in range(2):
+        side = choice([0, 1])  # Randomly choose left (0) or right (1)
+        if side == 0:
+            x_pos = ball_radius + 10
+        else:
+            x_pos = SCREEN_WIDTH - ball_radius
+        y_pos = randint(-200, -50)  # Start above the screen
+        balls.append(Ball(x_pos, y_pos, ball_radius, ball_speed))
+
+
+
+
 
     print("Place your hand in the rectangle and press 'c' to calibrate.")
     ycrcb_min, ycrcb_max = None, None
@@ -47,7 +83,15 @@ def main():
                 cv2.destroyWindow('Calibration')
                 print("Calibration Complete!")
             continue
-        
+         # Update and draw balls
+        for ball in balls:
+            ball.move()
+            ball.draw(frame)
+            # Reset ball to the top if it falls out of the screen
+            if ball.y - ball.radius > SCREEN_HEIGHT:
+                ball.y = randint(-200, -50)
+                ball.x = choice([ball_radius + 20, SCREEN_WIDTH-(ball_radius+20)])
+
         height=frame.shape[0]
         left_quarter_x = frame.shape[1] // 6
         right_corner_x = left_quarter_x*5
@@ -62,6 +106,7 @@ def main():
         bg_mask = bg_subtractor.apply(frame)
         
         #cv2.bitwise_not(mask_ycrcb)
+        #combined_mask=cv2.bitwise_and(mask_hsv,bg_mask)
         #combined_mask=cv2.bitwise_and(mask_hsv,bg_mask)
         #segmented_output = cv2.bitwise_and(frame, frame, mask=skin_mask)
         mask_hsv= skin_segmentation(frame, hsv_min, hsv_max)
