@@ -1,0 +1,29 @@
+import cv2
+import numpy as np
+
+def move_bullet(frame, start_point, angle, speed=10):
+    """
+    Animates a bullet moving from the start point at the given angle.
+
+    Parameters:
+        frame (numpy.ndarray): The frame to draw on.
+        start_point (tuple): (x, y) coordinates of the starting point.
+        angle (float): Angle of movement in radians.
+        speed (int): Number of pixels the bullet moves per frame.
+
+    Returns:
+        tuple: The new position of the bullet (x, y).
+    """
+    # Calculate the direction vector from the angle
+    dx = speed * np.cos(angle)
+    dy = speed * np.sin(angle)
+
+    # Update the bullet's position
+    new_x = start_point[0] + int(dx)
+    new_y = start_point[1] + int(dy)
+
+    # Draw the bullet on the frame
+    cv2.circle(frame, (new_x, new_y), 10, (200, 200, 255), -1)  # Bullet as a red circle
+
+    return new_x, new_y
+

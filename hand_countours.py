@@ -7,6 +7,9 @@ import math
 
 def find_hand_contour(contours, frame):
 
+    if len(contours)==0:
+        aspect_ratio = 0
+        hand_contour = None
     
     # Initialize the first contour as the hand_contour
     hand_contour = contours[0]
@@ -43,5 +46,5 @@ def find_hand_contour(contours, frame):
             hand_contour = contour
             break  # Stop after finding a valid hand contour
 
-    return hand_contour  # Return the identified hand contour
+    return hand_contour,aspect_ratio  # Return the identified hand contour
 

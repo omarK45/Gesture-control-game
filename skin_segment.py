@@ -37,8 +37,8 @@ def skin_segmentation(frame, hsv_min, hsv_max):
     #mask_combined = cv2.bitwise_and(mask_hsv, mask_ycrcb)
 
   
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
-    #mask_combined = cv2.morphologyEx(mask_combined, cv2.MORPH_OPEN, kernel, iterations=2)
-    #mask_combined = cv2.morphologyEx(mask_combined, cv2.MORPH_CLOSE, kernel, iterations=2)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4))
+    #mask_hsv = cv2.morphologyEx(mask_hsv, cv2.MORPH_OPEN, kernel, iterations=2)
+    #mask_hsv = cv2.morphologyEx(mask_hsv, cv2.MORPH_CLOSE, kernel, iterations=3)
 
     return mask_hsv
