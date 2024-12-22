@@ -13,7 +13,7 @@ def move_bullet(frame, start_point, angle_degrees, speed=14):
         start_point (tuple): (x, y) coordinates of the starting point.
         angle_degrees (float): Angle of movement in degrees (0° is right, 90° is up, 180° is left, 270° is down).
         speed (int): Number of pixels the bullet moves per frame.
-
+    hellooo
     Returns:
         tuple: The new position of the bullet (x, y).
     """
