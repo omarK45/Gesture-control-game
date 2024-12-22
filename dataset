@@ -1,0 +1,87 @@
+import cv2
+import numpy as np
+from skin_segment import calibrate_skin_tone, skin_segmentation
+import time
+
+def collect_segmented_hand_dataset(output_directory, hsv_min, hsv_max, max_samples=1000, capture_interval=0.1):
+  
+    cap = cv2.VideoCapture(1)
+    if not cap.isOpened():
+        print("Error: Cannot open camera.")
+        return
+
+    sample_count = 0
+    print("Capturing dataset. Press 'q' to quit early.")
+
+    start_time = time.time()
+
+    while sample_count < max_samples:
+        ret, frame = cap.read()
+        if not ret:
+            print("Error: Unable to capture frame.")
+            break
+
+        frame = cv2.flip(frame, 1)  # Flip the frame for correct orientation
+
+        # Apply skin segmentation
+        mask_hsv = skin_segmentation(frame, hsv_min, hsv_max)
+
+        # Display the original frame and segmented mask
+        cv2.imshow("Original Frame", frame)
+        cv2.imshow("Segmented Mask", mask_hsv)
+
+        # Automatically save images at intervals
+        if time.time() - start_time >= capture_interval:
+            filename = f"{output_directory}/segmented_hand_{sample_count}.png"
+            cv2.imwrite(filename, mask_hsv)
+            
+            sample_count += 1
+            start_time = time.time()
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            print("Quitting...")
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    # Define the output directory and ensure it exists
+    import os
+    output_directory = "/Users/maryamhabeb/Desktop/segmented_hands_dataset"
+    os.makedirs(output_directory, exist_ok=True)
+
+    # Calibrate skin tone
+    cap = cv2.VideoCapture(1)
+    if not cap.isOpened():
+        print("Error: Cannot open camera.")
+        exit()
+
+    print("Place your hand in the rectangle and press 'c' to calibrate.")
+    calibrated = False
+    hsv_min, hsv_max = None, None
+
+    while not calibrated:
+        ret, frame = cap.read()
+        if not ret:
+            print("Error: Unable to capture frame.")
+            break
+
+        frame = cv2.flip(frame, 1)
+        h, w, _ = frame.shape
+        cv2.rectangle(frame, (w // 2 - 50, h // 2 - 50), (w // 2 + 50, h // 2 + 50), (0, 255, 0), 2)
+        cv2.putText(frame, 'Press c to calibrate...', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        cv2.imshow('Calibration', frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('c'):
+            (hsv_min, hsv_max), _ = calibrate_skin_tone(frame)
+            calibrated = True
+            print("Calibration Complete!")
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+    if hsv_min and hsv_max:
+        collect_segmented_hand_dataset(output_directory, hsv_min, hsv_max)
+    else:
+        print("Calibration failed. Exiting.")

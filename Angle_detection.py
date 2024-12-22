@@ -1,18 +1,21 @@
 import math
+import numpy as np
 
-def calculate_angle(cog, point):
-    """
-    Calculate the angle between the CoG and a given point, rounded to the nearest 15 degrees.
+def calculate_angle(cog, hull):
+    max_distance = 0
+    furthest_point = None
 
-    Args:
-        cog (tuple): Coordinates of the center of gravity (x_CoG, y_CoG).
-        point (tuple): Coordinates of the other point (x_point, y_point).
+    for point in hull:
+        x, y = point # Hull points are stored as [[x, y]]
+        # Calculate Euclidean distance
+        distance = np.sqrt((x - cog[0])**2 + (y - cog[1])**2)
+        if distance > max_distance:
+            max_distance = distance
+            furthest_point = (x, y)
 
-    Returns:
-        int: The angle in degrees, rounded to the nearest 15 degrees.
-    """
+    
     # Calculate vector components
-    vector = (point[0] - cog[0], point[1] - cog[1])
+    vector = (furthest_point[0] - cog[0], furthest_point[1] - cog[1])
     
     # Calculate angle in radians
     angle_radians = math.atan2(vector[1], vector[0])
@@ -26,11 +29,18 @@ def calculate_angle(cog, point):
     # Round to the nearest multiple of 15
     rounded_angle = round(angle_degrees / 15) * 15
     
-    return rounded_angle
+    return rounded_angle, furthest_point
+
+# Example usage
 
 # Example usage
 cog = (250, 250)  # Center of gravity
-fingertip = (350, 200)  # Fingertip coordinates
+fingertip = [(300, 249)]  # Fingertip coordinates
 
-angle = calculate_angle(cog, fingertip)
+angle ,_= calculate_angle(cog, fingertip)
 print(f"Rounded Angle: {angle} degrees")
+
+#fo2 90
+#shemal 180
+#taht 270
+#yemeen 0/360

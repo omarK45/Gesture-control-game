@@ -10,8 +10,8 @@ from Dataset_Creation import *
 from CoG import *
 from Classification import *
 from convexity_defects import *
-
-
+from Angle_detection import *
+from bullet import *
 
 
 def main():
@@ -26,7 +26,9 @@ def main():
 
     print("Place your hand in the rectangle and press 'c' to calibrate.")
     ycrcb_min, ycrcb_max = None, None
-
+    bullet_position=None
+    
+    bullet_angle=None
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -101,7 +103,7 @@ def main():
         
         with open("/Users/maryamhabeb/Desktop/datasets/svm_model.pkl", "rb") as model_file:
             svm = pickle.load(model_file)
-        with open("/Users/maryamhabeb/Desktop/datasets/qscaler.pkl", "rb") as scaler_file:
+        with open("/Users/maryamhabeb/Desktop/datasets/scaler.pkl", "rb") as scaler_file:
             scaler = pickle.load(scaler_file)
 
         
@@ -115,13 +117,31 @@ def main():
         
         frame_features = np.array([num_defects, contour_hull_ratio, aspect_ratio, circularity]).reshape(1, -1)
         features_scaled = scaler.transform(frame_features)
-
+        # print(frame.shape)
         # Predict gesture
         prediction = svm.predict(features_scaled)
-        print("Prediction:", prediction[0])
-        cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        # print("Prediction:", prediction[0])
+        # cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        #________________________________________Bullet_____________________________________
+        
+        rounded_angle, furthest_point = calculate_angle(centroid,hull)
+        if(bullet_position==None):
+            bullet_position=furthest_point
+            bullet_angle=rounded_angle
+            
+            
+        
+        bullet_position = move_bullet(frame, bullet_position, bullet_angle, speed=15)
 
+    # Check if the bullet is out of frame
+        if (bullet_position[0] < 0 or bullet_position[0] >= frame.shape[1] or
+            bullet_position[1] < 0 or bullet_position[1] >= frame.shape[0]):
+            print("Bullet exited the frame.")
+            bullet_position=None
+            bullet_angle=None
 
+    # Display the frame
+        cv2.imshow("Bullet Animation", frame)
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             print("Pressed 'q' to quit.")
