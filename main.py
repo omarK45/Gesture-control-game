@@ -14,27 +14,18 @@ from Angle_detection import *
 from bullet import *
 from random import randint
 from random import choice
+from ball import Ball
+import time
 
 BALL_COLOR = (255, 255, 0)  # Yellow ball
 SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
 # Ball class to represent the falling balls
-class Ball:
-    def __init__(self, x, y, radius, speed):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.speed = speed
-    
-    def move(self):
-        self.y += self.speed  # Move the ball downwards
-
-    def draw(self, frame):
-        cv2.circle(frame, (self.x, self.y), self.radius, BALL_COLOR, -1)  # Draw the ball on the frame
 
 
-
+import pickle
+                        
 def main():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     if not cap.isOpened():
         print("Error: Cannot open camera.")
         return
@@ -43,7 +34,7 @@ def main():
     hsv_min, hsv_max = None, None
     # Create balls
     balls = []
-    ball_radius = 20
+    ball_radius = 30
     ball_speed = 15
 
     # Add initial balls to the list (randomly from left or right)
@@ -55,16 +46,15 @@ def main():
             x_pos = SCREEN_WIDTH - ball_radius
         y_pos = randint(-200, -50)  # Start above the screen
         balls.append(Ball(x_pos, y_pos, ball_radius, ball_speed))
-
-
-
-
-
     print("Place your hand in the rectangle and press 'c' to calibrate.")
     ycrcb_min, ycrcb_max = None, None
     bullet_position=None
     
     bullet_angle=None
+    score = 0
+    ball_spawn_interval = 5    # Time in seconds between spawning new balls
+    last_ball_spawn_time = time.time()  # Track the last spawn time
+    paused = False  # Initialize the pause state
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -82,15 +72,24 @@ def main():
                 cv2.destroyWindow('Calibration')
                 print("Calibration Complete!")
             continue
-         # Update and draw balls
-        for ball in balls:
-            ball.move()
-            ball.draw(frame)
-            # Reset ball to the top if it falls out of the screen
-            if ball.y - ball.radius > SCREEN_HEIGHT:
-                ball.y = randint(-200, -50)
-                ball.x = choice([ball_radius + 20, SCREEN_WIDTH-(ball_radius+20)])
+   
+        
+        #Pausingggggggggg Balls 
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
+            print("Pressed 'q' to quit.")
+            gui.quit_game()
+            break
+        elif key ==ord('p'):
+            paused = not paused
+            print("Pause isssss")
+            print(paused)
 
+
+        # if  cv2.waitKey(1) & 0xFF == ord('p'):  # Press 'p' to toggle pause
+
+           
+        bullet_position, bullet_angle, score, last_ball_spawn_time = Ball.update_and_draw(frame, balls, bullet_position, bullet_angle, ball_radius, ball_speed, score, last_ball_spawn_time, ball_spawn_interval,paused)
         height=frame.shape[0]
         left_quarter_x = frame.shape[1] // 6
         right_corner_x = left_quarter_x*5
@@ -112,14 +111,13 @@ def main():
 
         # Find contours from the HSV mask
         contours, hierarchy = cv2.findContours(mask_hsv, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
+        if len(contours)==0:
+           continue
         # Sort contours by area
         sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
         # Use the function to find the hand contour
-        if len(contours) == 0:
-            aspect_ratio = 0
-            hand_contour = None
+        
         hand_contour,aspect_ratio= find_hand_contour(sorted_contours, frame)
 
         # Draw the detected hand contour
@@ -146,9 +144,9 @@ def main():
         
         
         
-        with open("/Users/maryamhabeb/Desktop/datasets/svm_model.pkl", "rb") as model_file:
+        with open("datasets/svm_model.pkl", "rb") as model_file:
             svm = pickle.load(model_file)
-        with open("/Users/maryamhabeb/Desktop/datasets/scaler.pkl", "rb") as scaler_file:
+        with open("datasets/scaler.pkl", "rb") as scaler_file:
             scaler = pickle.load(scaler_file)
 
         
@@ -160,13 +158,20 @@ def main():
         perimeter = cv2.arcLength(hand_contour, True)
         circularity = (4 * np.pi * contour_area) / (perimeter ** 2)
         
-        frame_features = np.array([num_defects, contour_hull_ratio, aspect_ratio, circularity]).reshape(1, -1)
+        frame_features = np.array([len(defects), contour_hull_ratio, aspect_ratio, circularity]).reshape(1, -1)
         features_scaled = scaler.transform(frame_features)
         # print(frame.shape)
         # Predict gesture
         prediction = svm.predict(features_scaled)
-        # print("Prediction:", prediction[0])
-        # cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        print("Prediction:", prediction[0])
+        #cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        frame_features = np.array([len(defects), contour_hull_ratio, aspect_ratio, circularity]).reshape(1, -1)
+        features_scaled = scaler.transform(frame_features)
+        # print(frame.shape)
+        # Predict gesture
+        prediction = svm.predict(features_scaled)
+        print("Prediction:", prediction[0])
+        cv2.putText(frame, f"Gesture: {prediction[0]}", (1000, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         #________________________________________Bullet_____________________________________
         
         rounded_angle, furthest_point = calculate_angle(centroid,hull)
@@ -174,24 +179,18 @@ def main():
             bullet_position=furthest_point
             bullet_angle=rounded_angle
             
-            
-        
-        bullet_position = move_bullet(frame, bullet_position, bullet_angle, speed=15)
+     
+        if not paused:
+            bullet_position = move_bullet(frame, bullet_position, bullet_angle, speed=25)
 
     # Check if the bullet is out of frame
         if (bullet_position[0] < 0 or bullet_position[0] >= frame.shape[1] or
             bullet_position[1] < 0 or bullet_position[1] >= frame.shape[0]):
-            print("Bullet exited the frame.")
             bullet_position=None
             bullet_angle=None
 
     # Display the frame
         cv2.imshow("Bullet Animation", frame)
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('q'):
-            print("Pressed 'q' to quit.")
-            gui.quit_game()
-            break
 
     cap.release()
     cv2.destroyAllWindows()

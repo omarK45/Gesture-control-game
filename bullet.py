@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 import numpy as np
 
-def move_bullet(frame, start_point, angle_degrees, speed=14):
+def move_bullet(frame, start_point, angle_degrees, speed=35):
     """
     Animates a bullet moving from the start point at the given angle.
 

@@ -1,12 +1,6 @@
 import cv2
 import numpy as np
 import pygame
-from Background_subtract import BackgroundSubtractor
-from skin_segment import calibrate_skin_tone, skin_segmentation
-from hand_countours import *
-from convex_hull import *
-from CoG import *
-from Classification import *
 from main import main
 
 
