@@ -29,9 +29,9 @@ class Ball:
             if self.shrink_frames == 0:
                 self.radius = 0  # Completely shrink
 
-    def update_and_draw(frame, balls, bullet_position, bullet_angle, ball_radius, ball_speed, score, last_ball_spawn_time, ball_spawn_interval, paused):
+    def update_and_draw(frame, balls, bullet_position, bullet_angle, ball_radius, ball_speed, score,last_ball_spawn_time, ball_spawn_interval, paused,multiplier,pauseballs):
         # Update and draw balls only if not paused
-        if not paused:
+        if not paused and not pauseballs:
             for ball in balls:
                 ball.move()  # Move the ball only if the game is not paused
                 ball.draw(frame)
@@ -45,7 +45,7 @@ class Ball:
                     balls.remove(ball)  # Remove the ball on collision
                     bullet_position = None  # Reset the bullet position
                     bullet_angle = None
-                    score += 10  # Increase score by 10
+                    score += multiplier  # Increase score by 10
                     # Spawn new balls periodically even if the game is paused
             if time.time() - last_ball_spawn_time > ball_spawn_interval:
                 side = choice([0, 1])
@@ -56,14 +56,30 @@ class Ball:
                 y_pos = randint(-200, -50)
                 balls.append(Ball(x_pos, y_pos, ball_radius, ball_speed))
                 last_ball_spawn_time = time.time()
-        elif paused:
+        elif (paused==True):
          for ball in balls:
                 ball.draw(frame)
                 # Reset ball to the top if it falls out of the screen
                 if ball.y - ball.radius > SCREEN_HEIGHT:
                     ball.y = randint(-200, -50)
                     ball.x = choice([ball_radius + 20, SCREEN_WIDTH - (ball_radius + 20)])
+       
+       
+       #for peace sign
+        elif(pauseballs==True):
+            for ball in balls:
+                ball.draw(frame)
+                # Reset ball to the top if it falls out of the screen
+                if ball.y - ball.radius > SCREEN_HEIGHT:
+                    ball.y = randint(-200, -50)
+                    ball.x = choice([ball_radius + 20, SCREEN_WIDTH - (ball_radius + 20)])
 
+        # Check for collision with the bullet
+                if bullet_position and detect_collision(bullet_position, ball):
+                    balls.remove(ball)  # Remove the ball on collision
+                    bullet_position = None  # Reset the bullet position
+                    bullet_angle = None
+                    score += multiplier  # Increase score by 10
         
 
         # Display the score

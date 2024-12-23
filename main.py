@@ -27,11 +27,15 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
 import pickle
                         
 def main():
+    multiplier_timer=0
+    multiplier_bool=False
+    freeze_bool=False
+    freeze_timer=0
     gesture_change=False
     majority_element=None
     gesture_count=0
     gesture_array=[]
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     if not cap.isOpened():
         print("Error: Cannot open camera.")
         return
@@ -60,7 +64,9 @@ def main():
     score = 0
     ball_spawn_interval = 5    # Time in seconds between spawning new balls
     last_ball_spawn_time = time.time()  # Track the last spawn time
-    paused = False  # Initialize the pause state
+    paused = False  
+    pauseballs=False
+    multiplier=10
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -94,11 +100,33 @@ def main():
         if  (majority_element == "open palm") and gesture_change:
             paused=not paused
             gesture_change=False
+        if  (majority_element == "three") and gesture_change  and multiplier_timer==0:
+            multiplier=multiplier*3
+            gesture_change=False
+        if  (majority_element == "peace") and gesture_change and freeze_timer==0:
+
+            pauseballs=not pauseballs
+            gesture_change=False
+
+        if freeze_bool==True:
+            freeze_timer+=1
+        if freeze_timer==300:
+            freeze_bool=False
+            freeze_timer=0
+            pauseballs=not pauseballs
+
+        if multiplier_bool==True:
+            multiplier_timer+=1
+        
+        if multiplier_timer==300:
+            multiplier_bool=False
+            multiplier_timer=0
+            multiplier=10
 
         # if  cv2.waitKey(1) & 0xFF == ord('p'):  # Press 'p' to toggle pause
 
-           
-        bullet_position, bullet_angle, score, last_ball_spawn_time = Ball.update_and_draw(frame, balls, bullet_position, bullet_angle, ball_radius, ball_speed, score, last_ball_spawn_time, ball_spawn_interval,paused)
+        cv2.putText(frame, f"MULTIPLIER: {multiplier}", (700, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        bullet_position, bullet_angle, score, last_ball_spawn_time = Ball.update_and_draw(frame, balls, bullet_position, bullet_angle, ball_radius, ball_speed, score ,last_ball_spawn_time, ball_spawn_interval,paused,multiplier,pauseballs)
         height=frame.shape[0]
         left_quarter_x = frame.shape[1] // 6
         right_corner_x = left_quarter_x*5
@@ -178,8 +206,15 @@ def main():
         if gesture_count==30:
             
             majority_element = find_majority_element(gesture_array)
-            if majority_element=="open palm":
+            if majority_element=="open palm"  :
                 gesture_change=True
+            if  majority_element=="three":
+                gesture_change=True
+                multiplier_bool=True
+            if majority_element=="peace":
+                gesture_change=True
+                freeze_bool=True
+
             gesture_count=0
             gesture_array=[]
         #cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
