@@ -4,21 +4,26 @@
 
 import cv2
 import numpy as np
-import pygame
-import gui
-from Background_subtract import BackgroundSubtractor
-from skin_segment import calibrate_skin_tone, skin_segmentation
+
+
 from hand_countours import *
 from convex_hull import *
 from Dataset_Creation import *
 from CoG import *
-from Classification import *
+
 from convexity_defects import *
+
+import pickle
+                                                    
 import pandas as pd
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 def classify():
     features = []
-    input_folder = ["/Users/maryamhabeb/Desktop/datasets/five_train" , "/Users/maryamhabeb/Desktop/datasets/peace" , "/Users/maryamhabeb/Desktop/datasets/gun_left" ,"/Users/maryamhabeb/Desktop/datasets/thumbs"   ]
+    c=0
+    input_folder = ["datasets/open_palm" , "datasets/peace_2" , "datasets/khalid_gun" ,"datasets/segmented_3", "datasets/peace_kaddah" , "datasets/gun_ziad", "datasets/khalid_three", "datasets/gun_kaddah" ]
     for i in range(len(input_folder)):
             
         for filename in os.listdir(input_folder[i]):
@@ -30,7 +35,8 @@ def classify():
             _, image = cv2.threshold(image, 200, 255, cv2.THRESH_BINARY)
             # cv2.imshow("image",image)
             # print(image.shape)
-            
+            c+=1
+            print(c)
             contours, hierarchy = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
             # Sort contours by area
@@ -48,6 +54,14 @@ def classify():
             num_defects = len(defects)
             perimeter = cv2.arcLength(hand_contour, True)
             circularity = (4 * np.pi * contour_area) / (perimeter ** 2)
+            #["datasets/open_palm" 
+            # , "datasets/peace_2" , 
+            # "datasets/khalid_gun" ,
+            # "datasets/segmented_3",
+            # "datasets/peace_kaddah" ,
+            # "datasets/gun_ziad", 
+            # "datasets/khalid_three", 
+            # "datasets/gun_kaddah" ]
             if i==0:
                 label = "open palm"
             elif i == 1:
@@ -55,7 +69,25 @@ def classify():
             elif i == 2:
                 label = "gun"       
             elif i == 3:
-                label ="thumb up"
+                label ="three"
+                
+            elif i== 4:
+                label = "peace"
+                
+            elif i == 5:
+                label = "gun"
+            elif i == 6:
+                label = "three"
+                
+            elif i == 7:
+                label = "gun"
+                
+                
+                
+                
+                
+             
+             
             features.append([num_defects, contour_hull_ratio, aspect_ratio,circularity,label])
             
     # Convert to DataFrame
@@ -63,7 +95,7 @@ def classify():
     df = pd.DataFrame(features, columns=columns)
 
     # Save to CSV
-    df.to_csv("/Users/maryamhabeb/Desktop/datasets/five_tained.csv", index=False)
+    df.to_csv("datasets/five_tained.csv", index=False)
 
         
         
@@ -73,15 +105,10 @@ def classify():
                                                         ##svm##       
                                                         
                                                         
-    import pickle
-                                                        
-    import pandas as pd
-    from sklearn.svm import SVC
-    from sklearn.model_selection import train_test_split
-    from sklearn.preprocessing import StandardScaler
+ 
 
     # Load dataset
-    df = pd.read_csv("/Users/maryamhabeb/Desktop/datasets/five_tained.csv")
+    df = pd.read_csv("datasets/five_tained.csv")
     X = df.drop(columns=["Type"])
     y = df["Type"]  # Labels (e.g., "Open Palm", "Fist")
     print(len(X))
@@ -99,11 +126,12 @@ def classify():
 
 
     # Save SVM and scaler after training in classification file
-    with open("/Users/maryamhabeb/Desktop/datasets/svm_model.pkl", "wb") as model_file:
+    with open("datasets/svm_model.pkl", "wb") as model_file:
         pickle.dump(svm, model_file)
-    with open("/Users/maryamhabeb/Desktop/datasets/scaler.pkl", "wb") as scaler_file:
+    with open("datasets/scaler.pkl", "wb") as scaler_file:
         pickle.dump(scaler, scaler_file)
 
 
     # Evaluate the SVM
     print("Accuracy:", svm.score(X_test, y_test))
+#classify()

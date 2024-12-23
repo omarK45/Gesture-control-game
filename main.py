@@ -20,18 +20,6 @@ import time
 BALL_COLOR = (255, 255, 0)  # Yellow ball
 SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
 # Ball class to represent the falling balls
-class Ball:
-    def __init__(self, x, y, radius, speed):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.speed = speed
-    
-    def move(self):
-        self.y += self.speed  # Move the ball downwards
-
-    def draw(self, frame):
-        cv2.circle(frame, (self.x, self.y), self.radius, BALL_COLOR, -1)  # Draw the ball on the frame
 
 
 import pickle
@@ -156,19 +144,19 @@ def main():
         
         
         
-        # with open("/Users/maryamhabeb/Desktop/datasets/svm_model.pkl", "rb") as model_file:
-        #     svm = pickle.load(model_file)
-        # with open("/Users/maryamhabeb/Desktop/datasets/scaler.pkl", "rb") as scaler_file:
-        #     scaler = pickle.load(scaler_file)
+        with open("datasets/svm_model.pkl", "rb") as model_file:
+            svm = pickle.load(model_file)
+        with open("datasets/scaler.pkl", "rb") as scaler_file:
+            scaler = pickle.load(scaler_file)
 
         
         
-        # convex_hull_area = cv2.contourArea(np.array(hull, dtype=np.int32))
-        # contour_area = cv2.contourArea(hand_contour)
-        # contour_hull_ratio = contour_area / convex_hull_area
+        convex_hull_area = cv2.contourArea(np.array(hull, dtype=np.int32))
+        contour_area = cv2.contourArea(hand_contour)
+        contour_hull_ratio = contour_area / convex_hull_area
         
-        # perimeter = cv2.arcLength(hand_contour, True)
-        # circularity = (4 * np.pi * contour_area) / (perimeter ** 2)
+        perimeter = cv2.arcLength(hand_contour, True)
+        circularity = (4 * np.pi * contour_area) / (perimeter ** 2)
         
         frame_features = np.array([len(defects), contour_hull_ratio, aspect_ratio, circularity]).reshape(1, -1)
         features_scaled = scaler.transform(frame_features)
@@ -176,14 +164,14 @@ def main():
         # Predict gesture
         prediction = svm.predict(features_scaled)
         print("Prediction:", prediction[0])
-        cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        # frame_features = np.array([num_defects, contour_hull_ratio, aspect_ratio, circularity]).reshape(1, -1)
-        # features_scaled = scaler.transform(frame_features)
-        # # print(frame.shape)
-        # # Predict gesture
-        # prediction = svm.predict(features_scaled)
-        # print("Prediction:", prediction[0])
-        # cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        #cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        frame_features = np.array([len(defects), contour_hull_ratio, aspect_ratio, circularity]).reshape(1, -1)
+        features_scaled = scaler.transform(frame_features)
+        # print(frame.shape)
+        # Predict gesture
+        prediction = svm.predict(features_scaled)
+        print("Prediction:", prediction[0])
+        cv2.putText(frame, f"Gesture: {prediction[0]}", (1000, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         #________________________________________Bullet_____________________________________
         
         rounded_angle, furthest_point = calculate_angle(centroid,hull)
