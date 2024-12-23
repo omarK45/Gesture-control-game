@@ -16,16 +16,22 @@ from random import randint
 from random import choice
 from ball import Ball
 import time
+from extras import *
 
 BALL_COLOR = (255, 255, 0)  # Yellow ball
 SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
 # Ball class to represent the falling balls
 
 
+
 import pickle
                         
 def main():
-    cap = cv2.VideoCapture(1)
+    gesture_change=False
+    majority_element=None
+    gesture_count=0
+    gesture_array=[]
+    cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("Error: Cannot open camera.")
         return
@@ -85,6 +91,9 @@ def main():
             print("Pause isssss")
             print(paused)
 
+        if  (majority_element == "open palm") and gesture_change:
+            paused=not paused
+            gesture_change=False
 
         # if  cv2.waitKey(1) & 0xFF == ord('p'):  # Press 'p' to toggle pause
 
@@ -108,7 +117,7 @@ def main():
         #combined_mask=cv2.bitwise_and(mask_hsv,bg_mask)
         #segmented_output = cv2.bitwise_and(frame, frame, mask=skin_mask)
         mask_hsv= skin_segmentation(frame, hsv_min, hsv_max)
-
+        
         # Find contours from the HSV mask
         contours, hierarchy = cv2.findContours(mask_hsv, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         if len(contours)==0:
@@ -136,7 +145,7 @@ def main():
         defects = compute_convexity_defects(hand_contour, hull)
         frame = draw_convexity_defects(frame, hand_contour, defects)
 
-       
+        
         cv2.imshow("Original Frame", frame)
         #cv2.imshow("bg mask", bg_mask)
         #cv2.imshow("combined mask",combined_mask)
@@ -164,6 +173,15 @@ def main():
         # Predict gesture
         prediction = svm.predict(features_scaled)
         print("Prediction:", prediction[0])
+        gesture_array.append(prediction[0])
+        gesture_count+=1
+        if gesture_count==30:
+            
+            majority_element = find_majority_element(gesture_array)
+            if majority_element=="open palm":
+                gesture_change=True
+            gesture_count=0
+            gesture_array=[]
         #cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         frame_features = np.array([len(defects), contour_hull_ratio, aspect_ratio, circularity]).reshape(1, -1)
         features_scaled = scaler.transform(frame_features)
@@ -173,21 +191,21 @@ def main():
         print("Prediction:", prediction[0])
         cv2.putText(frame, f"Gesture: {prediction[0]}", (1000, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         #________________________________________Bullet_____________________________________
+        if majority_element=="gun":
+            rounded_angle, furthest_point = calculate_angle(centroid,hull)
+            if(bullet_position==None):
+                bullet_position=furthest_point
+                bullet_angle=rounded_angle
+                
         
-        rounded_angle, furthest_point = calculate_angle(centroid,hull)
-        if(bullet_position==None):
-            bullet_position=furthest_point
-            bullet_angle=rounded_angle
-            
-     
-        if not paused:
-            bullet_position = move_bullet(frame, bullet_position, bullet_angle, speed=25)
+            if not paused:
+                bullet_position = move_bullet(frame, bullet_position, bullet_angle, speed=25)
 
-    # Check if the bullet is out of frame
-        if (bullet_position[0] < 0 or bullet_position[0] >= frame.shape[1] or
-            bullet_position[1] < 0 or bullet_position[1] >= frame.shape[0]):
-            bullet_position=None
-            bullet_angle=None
+        # Check if the bullet is out of frame
+            if (bullet_position[0] < 0 or bullet_position[0] >= frame.shape[1] or
+                bullet_position[1] < 0 or bullet_position[1] >= frame.shape[0]):
+                bullet_position=None
+                bullet_angle=None
 
     # Display the frame
         cv2.imshow("Bullet Animation", frame)
