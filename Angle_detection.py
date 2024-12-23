@@ -38,7 +38,7 @@ cog = (250, 250)  # Center of gravity
 fingertip = [(300, 249)]  # Fingertip coordinates
 
 angle ,_= calculate_angle(cog, fingertip)
-print(f"Rounded Angle: {angle} degrees")
+#print(f"Rounded Angle: {angle} degrees")
 
 #fo2 90
 #shemal 180

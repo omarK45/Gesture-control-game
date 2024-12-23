@@ -17,6 +17,8 @@ from random import choice
 from ball import Ball
 import time
 from extras import *
+from skin_segment_dnn import *
+
 
 BALL_COLOR = (255, 255, 0)  # Yellow ball
 SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
@@ -27,6 +29,12 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
 import pickle
                         
 def main():
+    
+       # Initialize MediaPipe Hands
+    mp_hands = mp.solutions.hands
+    hands = mp_hands.Hands(static_image_mode=False,max_num_hands=2,min_detection_confidence=0.5, min_tracking_confidence=0.5)
+    mp_drawing = mp.solutions.drawing_utils
+    
     gesture_change=False
     majority_element=None
     gesture_count=0
@@ -117,6 +125,7 @@ def main():
         #combined_mask=cv2.bitwise_and(mask_hsv,bg_mask)
         #segmented_output = cv2.bitwise_and(frame, frame, mask=skin_mask)
         mask_hsv= skin_segmentation(frame, hsv_min, hsv_max)
+       
         
         # Find contours from the HSV mask
         contours, hierarchy = cv2.findContours(mask_hsv, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -150,6 +159,7 @@ def main():
         #cv2.imshow("bg mask", bg_mask)
         #cv2.imshow("combined mask",combined_mask)
         cv2.imshow("HSV Mask", mask_hsv)
+        #cv2.imshow("dnn Mask", mask_dnn)
         
         
         
@@ -172,7 +182,11 @@ def main():
         # print(frame.shape)
         # Predict gesture
         prediction = svm.predict(features_scaled)
+        predictiondnn=predict_gesture_from_frame(frame,hands,mp_drawing)
         print("Prediction:", prediction[0])
+        print("Prediction: using dnn", predictiondnn)
+        cv2.putText(frame, f"Gesture: {prediction[0]}", (1000, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, f"Gesture: {predictiondnn}", (1000, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         gesture_array.append(prediction[0])
         gesture_count+=1
         if gesture_count==30:
@@ -182,14 +196,7 @@ def main():
                 gesture_change=True
             gesture_count=0
             gesture_array=[]
-        #cv2.putText(frame, f"Gesture: {prediction[0]}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        frame_features = np.array([len(defects), contour_hull_ratio, aspect_ratio, circularity]).reshape(1, -1)
-        features_scaled = scaler.transform(frame_features)
-        # print(frame.shape)
-        # Predict gesture
-        prediction = svm.predict(features_scaled)
-        print("Prediction:", prediction[0])
-        cv2.putText(frame, f"Gesture: {prediction[0]}", (1000, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    
         #________________________________________Bullet_____________________________________
         if majority_element=="gun":
             rounded_angle, furthest_point = calculate_angle(centroid,hull)
