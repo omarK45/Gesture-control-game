@@ -39,6 +39,6 @@ def skin_segmentation(frame, hsv_min, hsv_max):
   
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4))
     #mask_hsv = cv2.morphologyEx(mask_hsv, cv2.MORPH_OPEN, kernel, iterations=2)
-    #mask_hsv = cv2.morphologyEx(mask_hsv, cv2.MORPH_CLOSE, kernel, iterations=3)
+    mask_hsv = cv2.morphologyEx(mask_hsv, cv2.MORPH_CLOSE, kernel, iterations=2)
 
     return mask_hsv

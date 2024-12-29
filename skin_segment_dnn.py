@@ -59,6 +59,6 @@ def predict_gesture_from_frame(frame, hands, mp_drawing):
 
     if results.multi_hand_landmarks:
         for hand_landmarks in results.multi_hand_landmarks:
-            # mp_drawing.draw_landmarks(frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
+            #mp_drawing.draw_landmarks(frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
             return classify_gesture(hand_landmarks.landmark)
     return "No Hand Detected"

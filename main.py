@@ -43,7 +43,7 @@ def main():
     majority_element=None
     gesture_count=0
     gesture_array=[]
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("Error: Cannot open camera.")
         return
@@ -117,8 +117,9 @@ def main():
             gesture_change=False
 
         if freeze_bool==True:
+            cv2.putText(frame, f"Gesture: {"Frozen"}", (1000, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             freeze_timer+=1
-        if freeze_timer==300:
+        if freeze_timer==120:
             freeze_bool=False
             freeze_timer=0
             pauseballs=not pauseballs
@@ -213,11 +214,11 @@ def main():
         predictiondnn=predict_gesture_from_frame(frame,hands,mp_drawing)
         print("Prediction:", prediction[0])
         print("Prediction: using dnn", predictiondnn)
-        cv2.putText(frame, f"Gesture: {prediction[0]}", (1000, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        cv2.putText(frame, f"Gesture: {predictiondnn}", (1000, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, f"Gesture : {prediction[0]}", (950, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, f"Gesture : {predictiondnn}", (950, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         gesture_array.append(prediction[0])
         gesture_count+=1
-        if gesture_count==30:
+        if gesture_count==45:
             
             majority_element = find_majority_element(gesture_array)
             if majority_element=="open palm"  :
